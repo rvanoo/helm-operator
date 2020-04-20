@@ -265,6 +265,7 @@ next:
 			action = UpgradeAction
 			goto next
 		}
+		status.SetStatusPhase(r.hrClient.HelmReleases(hr.Namespace), hr, v1.HelmReleasePhaseSucceeded)
 		logger.Log("info", "no changes", "phase", action)
 	case InstallAction:
 		logger.Log("info", "running installation", "phase", action)
@@ -342,9 +343,6 @@ func (r *Release) dryRunCompare(client helm.Client, rel *helm.Release, hr *v1.He
 	chart chart, values []byte) (dryRel *helm.Release, diff string, err error) {
 	defer func(start time.Time) {
 		ObserveReleaseAction(start, DryRunCompareAction, err == nil, hr.GetTargetNamespace(), hr.GetReleaseName())
-		if err != nil {
-			println(err.Error())
-		}
 	}(time.Now())
 	dryRel, err = client.UpgradeFromPath(chart.chartPath, hr.GetReleaseName(), values, helm.UpgradeOptions{
 		DryRun:      true,
